@@ -118,6 +118,8 @@ export class RuntimeWorld implements IRuntimeWorld, IMutableWorld {
             }, this.systemWorld)
         }
 
+        const systemsInSchedules = [];
+
         { // Get all systems and cache the result
             this.systems = new Set(this.config.defaultScheduler.getSystems());
             let scheduler;
@@ -127,15 +129,15 @@ export class RuntimeWorld implements IRuntimeWorld, IMutableWorld {
                 for (system of scheduler.getSystems()) {
                     system.setRuntimeContext(this);
                     this.systems.add(system);
+                    systemsInSchedules.push(system);
                 }
             }
         }
 
         { // set the context for all systems
             let system;
-
             for (system of this.systems) {
-                if (system.runtimeContext !== undefined) {
+                if (!systemsInSchedules.includes(system) && system.runtimeContext !== undefined) {
                     throw new Error('Cannot use a system in two runtimes at the same time!');
                 }
 
